@@ -101,29 +101,128 @@ jobs:
           key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            set -e
-            mkdir -p ${{ secrets.STAGING_DEPLOY_DIR }}
+            set -euo pipefail
+
+            # Variables (these will be interpolated by the action)
+            DEPLOY_DIR="${{ secrets.STAGING_DEPLOY_DIR }}"
+            REMOTE_USER="${{ secrets.STAGING_SSH_USER }}"
+            HOME_DIR="/home/${REMOTE_USER}"
+            TARBALL_PATH="${HOME_DIR}/app.tar.gz"
+            
+            echo "Ensure deploy dir exists: ${DEPLOY_DIR}"
+            sudo mkdir -p "${DEPLOY_DIR}"
+            sudo chown "${REMOTE_USER}:${REMOTE_USER}" "${DEPLOY_DIR}" || true
+            
+            # Clean and prepare temp extract dir
             rm -rf /tmp/app_deploy || true
             mkdir -p /tmp/app_deploy
-            tar -xzf app.tar.gz -C /tmp/app_deploy
-            # Move files into deploy dir (customize as needed)
-            sudo rm -rf "${{ secrets.STAGING_DEPLOY_DIR }}/*" || true
-            sudo cp -r /tmp/app_deploy/* "${{ secrets.STAGING_DEPLOY_DIR }}/"
-            cd "${{ secrets.STAGING_DEPLOY_DIR }}"
-            # Ensure python and pip are available (example for Amazon Linux / Ubuntu)
-            if command -v python3 >/dev/null 2>&1; then
-              sudo python3 -m pip install --upgrade pip
-              sudo python3 -m pip install -r requirements.txt
-            else
-              sudo apt-get update && sudo apt-get install -y python3 python3-pip
-              sudo python3 -m pip install --upgrade pip
-              sudo python3 -m pip install -r requirements.txt
+            
+            # Extract uploaded tarball (make sure you copied it to remote BEFORE running this)
+            if [ ! -f "${TARBALL_PATH}" ]; then
+              echo "ERROR: ${TARBALL_PATH} not found."
+              exit 1
             fi
-            # Stop previous app (example using pkill)
+            tar -xzf "${TARBALL_PATH}" -C /tmp/app_deploy
+            
+            # Determine python3 and pip situation
+            echo "Checking python3 and pip availability..."
+            PYTHON=python3
+            
+            if command -v "${PYTHON}" >/dev/null 2>&1; then
+              echo "${PYTHON} found: $(${PYTHON} --version 2>&1)"
+            else
+              echo "${PYTHON} not found — attempting to install python3"
+            fi
+            
+            # Detect distro for package manager install
+            if [ -f /etc/os-release ]; then
+              . /etc/os-release
+              DISTRO_ID="${ID:-unknown}"
+              DISTRO_NAME="${NAME:-unknown}"
+              echo "Detected distro: ${DISTRO_NAME} (${DISTRO_ID})"
+            else
+              DISTRO_ID="unknown"
+            fi
+            
+            install_pip_with_pkgmgr() {
+              echo "Trying package manager install for pip..."
+              if command -v apt-get >/dev/null 2>&1; then
+                sudo apt-get update -y
+                sudo apt-get install -y python3 python3-venv python3-pip
+              elif command -v yum >/dev/null 2>&1; then
+                sudo yum install -y python3 python3-pip
+              elif command -v dnf >/dev/null 2>&1; then
+                sudo dnf install -y python3 python3-pip
+              elif command -v zypper >/dev/null 2>&1; then
+                sudo zypper install -y python3 python3-pip
+              else
+                echo "No supported package manager found."
+                return 1
+              fi
+            }
+            
+            # Try to install pip via package manager first (safe)
+            if ! ${PYTHON} -m pip --version >/dev/null 2>&1; then
+              if install_pip_with_pkgmgr; then
+                echo "Installed python3/pip via package manager."
+              else
+                echo "Package manager install failed; trying ensurepip/get-pip.py fallback..."
+                # Try ensurepip
+                if ${PYTHON} -m ensurepip --upgrade >/dev/null 2>&1; then
+                  echo "Installed pip via python -m ensurepip."
+                else
+                  # Fallback: download get-pip.py and run it
+                  echo "Downloading get-pip.py..."
+                  curl -sS https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py
+                  sudo ${PYTHON} /tmp/get-pip.py
+                  rm -f /tmp/get-pip.py
+                fi
+              fi
+            fi
+            
+            # Final check
+            if ! ${PYTHON} -m pip --version >/dev/null 2>&1; then
+              echo "ERROR: pip still not available after attempts."
+              exit 1
+            fi
+            echo "pip is available: $(${PYTHON} -m pip --version)"
+            
+            # Move code into deploy dir
+            echo "Copying files to ${DEPLOY_DIR}..."
+            # Optionally clear old contents (be careful)
+            sudo rm -rf "${DEPLOY_DIR:?}/"*
+            sudo cp -r /tmp/app_deploy/* "${DEPLOY_DIR}/"
+            sudo chown -R "${REMOTE_USER}:${REMOTE_USER}" "${DEPLOY_DIR}"
+            
+            cd "${DEPLOY_DIR}"
+            
+            # Create and activate virtualenv (recommended)
+            VENV_DIR="${DEPLOY_DIR}/.venv"
+            if [ ! -d "${VENV_DIR}" ]; then
+              echo "Creating virtualenv at ${VENV_DIR}"
+              ${PYTHON} -m venv "${VENV_DIR}"
+            fi
+            
+            # Activate and install deps
+            # Use pip from venv explicitly to avoid permission issues
+            echo "Installing requirements into virtualenv..."
+            "${VENV_DIR}/bin/pip" install --upgrade pip
+            if [ -f requirements.txt ]; then
+              "${VENV_DIR}/bin/pip" install -r requirements.txt
+            else
+              echo "No requirements.txt found in ${DEPLOY_DIR}"
+            fi
+            
+            # Stop previous app (non-fatal)
+            echo "Stopping previous Flask processes..."
             sudo pkill -f "flask run" || true
-            # Start app (for staging demo). For production, use systemd/gunicorn.
-            nohup flask run --host=0.0.0.0 --port=8000 > app.log 2>&1 &
-            echo "Staging deployment finished."
+            
+            # Start the app using virtualenv's python - uses nohup for demo
+            echo "Starting Flask app with virtualenv python..."
+            nohup "${VENV_DIR}/bin/python" -m flask run --host=0.0.0.0 --port=8000 > "${DEPLOY_DIR}/app.log" 2>&1 &
+            
+            echo "Deployment completed successfully."
+
 
   # # Deploy to production when a tag is pushed (v*)
   # deploy-prod:
