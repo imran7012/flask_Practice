@@ -72,7 +72,7 @@ jobs:
     name: Deploy → Staging
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref == 'refs/heads/staging' && needs.build.result == 'success'
+    if: github.ref == 'refs/heads/main' && needs.build.result == 'success'
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -115,41 +115,41 @@ jobs:
             nohup flask run --host=0.0.0.0 --port=8000 > app.log 2>&1 &
             echo "Staging deployment finished."
 
-  # Deploy to production when a tag is pushed (v*)
-  deploy-prod:
-    name: Deploy → Production
-    runs-on: ubuntu-latest
-    needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: app-tar
-          path: .
+  # # Deploy to production when a tag is pushed (v*)
+  # deploy-prod:
+  #   name: Deploy → Production
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   if: startsWith(github.ref, 'refs/tags/v')
+  #   steps:
+  #     - name: Download artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: app-tar
+  #         path: .
 
-      - name: Install ssh client
-        run: sudo apt-get update && sudo apt-get install -y openssh-client
+  #     - name: Install ssh client
+  #       run: sudo apt-get update && sudo apt-get install -y openssh-client
 
-      - name: Deploy to production via SSH
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.PROD_SSH_HOST }}
-          username: ${{ secrets.PROD_SSH_USER }}
-          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
-          port: 22
-          script: |
-            set -e
-            mkdir -p ${{ secrets.PROD_DEPLOY_DIR }}
-            rm -rf /tmp/app_deploy || true
-            mkdir -p /tmp/app_deploy
-            tar -xzf app.tar.gz -C /tmp/app_deploy
-            sudo rm -rf "${{ secrets.PROD_DEPLOY_DIR }}/*" || true
-            sudo cp -r /tmp/app_deploy/* "${{ secrets.PROD_DEPLOY_DIR }}/"
-            cd "${{ secrets.PROD_DEPLOY_DIR }}"
-            sudo python3 -m pip install --upgrade pip
-            sudo python3 -m pip install -r requirements.txt
-            # Replace this with systemd/gunicorn restart if you have a service
-            sudo pkill -f "flask run" || true
-            nohup flask run --host=0.0.0.0 --port=8000 > app.log 2>&1 &
-            echo "Production deployment finished."
+  #     - name: Deploy to production via SSH
+  #       uses: appleboy/ssh-action@v0.1.7
+  #       with:
+  #         host: ${{ secrets.PROD_SSH_HOST }}
+  #         username: ${{ secrets.PROD_SSH_USER }}
+  #         key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+  #         port: 22
+  #         script: |
+  #           set -e
+  #           mkdir -p ${{ secrets.PROD_DEPLOY_DIR }}
+  #           rm -rf /tmp/app_deploy || true
+  #           mkdir -p /tmp/app_deploy
+  #           tar -xzf app.tar.gz -C /tmp/app_deploy
+  #           sudo rm -rf "${{ secrets.PROD_DEPLOY_DIR }}/*" || true
+  #           sudo cp -r /tmp/app_deploy/* "${{ secrets.PROD_DEPLOY_DIR }}/"
+  #           cd "${{ secrets.PROD_DEPLOY_DIR }}"
+  #           sudo python3 -m pip install --upgrade pip
+  #           sudo python3 -m pip install -r requirements.txt
+  #           # Replace this with systemd/gunicorn restart if you have a service
+  #           sudo pkill -f "flask run" || true
+  #           nohup flask run --host=0.0.0.0 --port=8000 > app.log 2>&1 &
+  #           echo "Production deployment finished."
