@@ -57,7 +57,7 @@ jobs:
           python-version: '3.10'
       - name: Build artifact (create tarball)
         run: |
-          tar -czf app.tar.gz --exclude='.git' .
+          tar --warning=no-file-changed -czf app.tar.gz --exclude='.git' .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
