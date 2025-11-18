@@ -219,7 +219,8 @@ jobs:
             
             # Start the app using virtualenv's python - uses nohup for demo
             echo "Starting Flask app with virtualenv python..."
-            nohup "${VENV_DIR}/bin/python" -m flask run --host=0.0.0.0 --port=8000 > "${DEPLOY_DIR}/app.log" 2>&1 &
+            MONGO_URI="mongodb+srv://syed9848314_db_user:rwEfzHrMTKcFSXeZ@cluster0.z6sy8q6.mongodb.net/flaskpractice?appName=Cluster0"
+            nohup env MONGO_URI="$MONGO_URI" "${VENV_DIR}/bin/python" -m flask run --host=0.0.0.0 --port=8000 > "${DEPLOY_DIR}/app.log" 2>&1 &
             
             echo "Deployment completed successfully."
 
