@@ -214,8 +214,8 @@ jobs:
             fi
             
             # Stop previous app (non-fatal)
-            echo "Stopping previous Flask processes..."
-            sudo pkill -f "flask run" || true
+            # echo "Stopping previous Flask processes..."
+            # sudo pkill -f "flask run" || true
             
             # Start the app using virtualenv's python - uses nohup for demo
             echo "Starting Flask app with virtualenv python..."
