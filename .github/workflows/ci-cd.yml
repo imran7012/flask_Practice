@@ -58,9 +58,7 @@ jobs:
       - name: Build artifact (create tarball)
         run: |
           mkdir build
-          shopt -s dotglob
-          cp -r * build/
-          rm -rf build/.git
+          rsync -av --exclude '.git' --exclude 'build' ./ build/
           tar -czf app.tar.gz -C build .
 
       - name: Upload artifact
