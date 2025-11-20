@@ -59,120 +59,45 @@
 
  ## Jenkinsfile:
 
-   pipeline {
-    agent any
+  ## Create a Jenkinsfile in the root of your Python application repository.
 
-    parameters {
-    string(name: 'EC2_HOST', defaultValue: 'EC2 IP Address', description: 'Target EC2 host')
-  }
+<img width="1320" height="826" alt="image" src="https://github.com/user-attachments/assets/c9ff6007-4c79-4496-b2c7-85f4aadb6a10" />
 
-    environment {
-        VENV_DIR = "${WORKSPACE}/venv"
-        SSH_KEY_ID = "syed-ID-ssh"
-        EC2_USERNAME = "ec2-user"
-        EC2_HOST = "${params.EC2_HOST}"
-        DEPLOY_DIR = "/home/ec2-user/flask_app"
-    }
 
-    stages {
+## Define a pipeline with the following stages:
 
-        stage('Checkout') {
-            steps {
-                echo "Cloning repository..."
-                sh '''
-                    rm -rf flask_Practice
-                    git clone https://github.com/imran7012/flask_Practice.git
-                '''
-            }
-        }
+  ## Build: Install dependencies using pip.
 
-        stage('Build') {
-            steps {
-                echo "Setting up venv and installing dependencies..."
-                sh '''
-                    python3 -m venv "$VENV_DIR"
-                    . "$VENV_DIR/bin/activate"
-                    pip install --upgrade pip
-                '''
-            }
-        }
+<img width="425" height="195" alt="image" src="https://github.com/user-attachments/assets/2c00e0ef-1845-4ffd-8be0-7d9de54358dd" />
 
-        stage('Test') {
-            steps {
-                echo "Running pytest..."
-                sh '''
-                    . "$VENV_DIR/bin/activate"
-                    pip install pytest
-                    cd flask_Practice
-                    pytest -v || exit 1
-                '''
-            }
-        }
 
-        stage('Deploy') {
-            steps {
-                sshagent(credentials: [env.SSH_KEY_ID]) {
-                    sh """
-                        echo "Creating tarball..."
-                        rm -f app.tar.gz
-                        tar --exclude='flask_Practice/.git' -czf app.tar.gz flask_Practice
+  ## Test: Run unit tests using a testing framework like pytest.
 
-                        echo "Copying tarball to EC2..."
-                        scp -o StrictHostKeyChecking=no app.tar.gz ${EC2_USERNAME}@${EC2_HOST}:/home/ec2-user/
+<img width="349" height="222" alt="image" src="https://github.com/user-attachments/assets/19cab0af-9977-453c-b03b-be9f71edf7d4" />
 
-                        echo "Running remote deploy..."
-                        ssh -o StrictHostKeyChecking=no ${EC2_USERNAME}@${EC2_HOST} << 'ENDSSH'
-set -e
 
-sudo yum install -y python3 python3-pip
+  ## Deploy: If tests pass, deploy the application to a staging environment.
 
-mkdir -p ${DEPLOY_DIR}
-rm -rf ${DEPLOY_DIR}/flask_Practice
-tar xzf /home/ec2-user/app.tar.gz -C ${DEPLOY_DIR}
+<img width="694" height="762" alt="image" src="https://github.com/user-attachments/assets/c820079b-cbf0-4638-ae98-980c1d18a9b0" />
 
-cd ${DEPLOY_DIR}/flask_Practice
 
-sudo pip install -r ${DEPLOY_DIR}/flask_Practice/requirements.txt
-
-sudo pkill -f "flask run" || true
-
-nohup flask run --host=0.0.0.0 --port=8000 > app.log 2>&1 &
-
-echo " Deployment Completed"
-ENDSSH
-
-                        rm -f app.tar.gz
-                    """
-                }
-            }
-        }
-    }
-
-    post {
-        success {
-            emailext(
-                subject: "Build SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: "Your Jenkins build was successful.",
-                to: "imran7012@gmail.com"
-            )
-        }
-        failure {
-            emailext(
-                subject: "Build FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: "Your Jenkins build failed. Please check the console output: ${env.BUILD_URL}",
-                to: "imran7012@gmail.com"
-            )
-        }
-    }
-}
+---
 
  ## Pipeline Triggers:
-   Steps:
-    Open Jenkins job
+ 
+   ## Steps:
+    1.Open Jenkins job
     
-    Go to Configure → Build Triggers
+    2.Go to Configure → Build Triggers
     
-    Enable:
-    ✔️ GitHub hook trigger for GITScm polling
+    3.Enable: GitHub hook trigger for GITScm polling
     
+  <img width="778" height="665" alt="image" src="https://github.com/user-attachments/assets/3109a24b-0cb2-4cb8-92f8-343b3427f438" />
+
+    4.Configure webhook in GitHub:
+    
+  <img width="1383" height="887" alt="image" src="https://github.com/user-attachments/assets/d17aee56-2548-492b-a723-9b2ff4985018" />
+
+    
+
 
