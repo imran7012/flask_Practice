@@ -1,11 +1,15 @@
 pipeline {
     agent any
 
+    parameters {
+    string(name: 'EC2_HOST', defaultValue: 'EC2 IP Address', description: 'Target EC2 host')
+  }
+
     environment {
         VENV_DIR = "${WORKSPACE}/venv"
         SSH_KEY_ID = "syed-ID-ssh"
         EC2_USERNAME = "ec2-user"
-        EC2_HOST = "3.110.232.52"
+        EC2_HOST = "${params.EC2_HOST}"
         DEPLOY_DIR = "/home/ec2-user/flask_app"
     }
 
