@@ -1,133 +1,45 @@
-# Student Registration System
+# 1. CI/CD Pipeline for Flask Application Using Jenkins
 
-A simple **Flask** web application to manage student records with **MongoDB** as the backend database. Users can **add, view, update, and delete** student details.
+## Description:
 
----
+  1.This project demonstrates how to set up a complete CI/CD pipeline using Jenkins for a simple Flask web application.
+  The pipeline automatically performs the following:
+  
+  2.Builds the application by installing dependencies
+  
+  3.Runs unit tests using pytest
+  
+  4.Deploys the application to a staging server if all tests pass
+  
+  5.Triggers automatically on every push to the "**Jenkins**" branch
+  
+  6.Sends email notifications on success or failure
 
-## Features
+## Prerequisites:
 
-* List all students on the home page
-* Add a new student
-* Update existing student details
-* Delete a student with confirmation
-* Simple and responsive UI using Bootstrap
+ ## On Jenkins Server:
 
----
+  1.Jenkins (latest LTS)
+    
+  2.Git plugin
+    
+  3.Python 3.x
+    
+  4.pip
+    
+  5.pytest
+    
+  6.SSH or password access to staging server
+    
+  7.Email Notification configured in Jenkins (SMTP settings)
 
-## Tech Stack
+ ## On Staging Server
 
-* **Backend:** Python, Flask
-* **Database:** MongoDB (via Flask-PyMongo)
-* **Frontend:** HTML, Jinja2 templates, Bootstrap 5
-* **Environment Variables:** Managed via `.env` file
-
----
-
-## Setup Instructions
-
-### 1. Clone the repository
-
-```bash
-git clone <your-repo-url>
-cd <repo-folder>
-```
-
-### 2. Create and activate a virtual environment
-
-```bash
-python -m venv venv
-# Activate venv
-# Windows:
-venv\Scripts\activate
-# Linux / Mac:
-source venv/bin/activate
-```
-
-### 3. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-**`requirements.txt` example:**
-
-```
-Flask
-Flask-PyMongo
-python-dotenv
-bson
-```
-
-### 4. Configure environment variables
-
-Create a `.env` file in the project root:
-
-```
-MONGO_URI=<your-mongodb-connection-string>
-SECRET_KEY=<your-secret-key>
-```
-
-### 5. Run the application
-
-```bash
-python app.py
-```
-
-Open your browser at: [http://localhost:8000](http://localhost:8000)
-
----
-
-## Project Structure
-
-```
-project/
-│
-├── templates/
-│   ├── base.html
-│   ├── index.html
-│   ├── add_student.html
-│   ├── update_student.html
-│
-├── app.py
-├── requirements.txt
-└── .env
-```
-
----
-
-## Screenshots
-
-**Home Page**
-Lists all students with Edit/Delete buttons.
-- <img width="1902" height="607" alt="image" src="https://github.com/user-attachments/assets/a58a6a6d-4978-4769-8074-232e4d31e69d" />
-
-
-**Add Student**
-Form to add a new student.
-- <img width="1897" height="801" alt="image" src="https://github.com/user-attachments/assets/d65d25c3-ebb5-410a-adb1-e130ad7c5878" />
-
-
-**Update Student**
-Form pre-filled with student details.
-- <img width="1905" height="897" alt="image" src="https://github.com/user-attachments/assets/04febf01-879f-431f-ab07-abcfb993acf1" />
-
-
-
----
-
-## Notes
-
-* Make sure MongoDB is running and accessible via the URI in `.env`
-* Delete action includes a confirmation page to prevent accidental deletion
-* Uses `ObjectId` from `bson` to work with MongoDB document IDs
-
----
-
-## License
-
-MIT License
-
----
-
-
-
+  1.Python 3.x installed
+    
+  2.Required dependencies installed via requirements.txt
+    
+  3.Port 8000 or custom port open
+    
+  4.SSH access enabled
+  
