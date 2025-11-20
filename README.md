@@ -98,6 +98,27 @@
     
   <img width="1383" height="887" alt="image" src="https://github.com/user-attachments/assets/d17aee56-2548-492b-a723-9b2ff4985018" />
 
+---
+
+## Notifications:
+ 
+   Email notifications are enabled using the Jenkins Email Extension Plugin.
+  
+   Notifications are sent when:
+  
+     Build succeeds
+  
+     Build fails
+  
+  SMTP details must be configured in:
+  
+  Manage Jenkins → Configure System → Extended E-mail Notification
+
+<img width="1703" height="782" alt="image" src="https://github.com/user-attachments/assets/797d1c85-4709-4fb6-9245-038b9cda719f" />
+
+
+
     
+
 
 
