@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     parameters {
-    string(name: 'EC2_HOST', defaultValue: 'EC2 IP Address', description: 'Target EC2 host')
+    string(name: 'EC2_HOST', defaultValue: '13.201.122.170', description: 'Target EC2 host')
   }
 
     environment {
