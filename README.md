@@ -102,13 +102,7 @@
 
 ## Notifications:
  
-   Email notifications are enabled using the Jenkins Email Extension Plugin.
-  
-   Notifications are sent when:
-  
-     Build succeeds
-  
-     Build fails
+  Email notifications are enabled using the Jenkins Email Extension Plugin.
   
   SMTP details must be configured in:
   
@@ -116,9 +110,50 @@
 
 <img width="1703" height="782" alt="image" src="https://github.com/user-attachments/assets/797d1c85-4709-4fb6-9245-038b9cda719f" />
 
+   Notifications are sent when:
+  
+     Build succeeds
+  
+     Build fails
+
+<img width="853" height="499" alt="image" src="https://github.com/user-attachments/assets/76637a5f-5fed-46d5-8c10-e4c2d838cce0" />
+
+
+<img width="1057" height="494" alt="image" src="https://github.com/user-attachments/assets/f05e154f-6988-4d27-88e7-467330718431" />
+
+
+
+---
+     
+## Deployment outcome:
+
+  https://jenkinsacademics.herovired.com/job/syed_Flask_test/
+
+  ## Deploy-Stage Results:
+  
+  
+  <img width="1456" height="966" alt="image" src="https://github.com/user-attachments/assets/68ed0a00-a87c-4ebc-ab42-1de49393c17f" />
+  
+
+
+  <img width="1483" height="601" alt="image" src="https://github.com/user-attachments/assets/d3a2f99a-2973-4968-9dcf-daad23e782e4" />
+
+
+  Compass Database:
+
+  <img width="1151" height="977" alt="image" src="https://github.com/user-attachments/assets/0dd79670-a061-4018-a0b6-3caefadf9c5c" />
+
+  
+
+  
+
+
+   
+
 
 
     
+
 
 
 
