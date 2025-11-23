@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - staging
     tags:
       - 'v*'         # production deploys triggered by tags like v1.0.0
   workflow_dispatch: {}
@@ -72,7 +73,7 @@ jobs:
     name: Deploy → Staging
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref == 'refs/heads/main' && needs.build.result == 'success'
+    if: github.ref == 'refs/heads/staging' && needs.build.result == 'success'
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
